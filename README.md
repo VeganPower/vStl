@@ -13,3 +13,24 @@ WORKING IN PROGRESS. DON'T CLONE
 ### TODO:
 range based algorithms
 
+ * for_each
+ * filter
+ * transform
+ * flattern
+ * take
+ * drop
+ * zip
+ * map
+
+
+// allocator 
+// DEFINE COMPATIBILITY WITH std::STL
+// view and range
+   // filter
+   // lazy transform
+   // flattern
+   // take
+   // drop
+   // for each
+// zip
+// map

@@ -1,18 +1,4 @@
-// memoryblock
-// allocator
-// DEFINE COMPATIBILITY WITH std::STL
-// view and range
-   // for each
-   // find
-   // any_of
-   // all
-   // filter
-   // lazy transform
-   // flattern
-   // take
-   // drop
-// zip
-// map
+
 
 #include <iostream>
 
