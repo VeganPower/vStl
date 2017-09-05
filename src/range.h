@@ -28,7 +28,10 @@ public:
    typedef typename std::remove_const<T>::type Type;
    typedef const Type* ConstPtr;
 
-   ConstRange(ConstPtr a, ConstPtr b);
+   ConstRange(ConstPtr b, ConstPtr e)
+      : b_(b)
+      , e_(e)
+   {}
    ConstPtr begin() const { return b_; }
    ConstPtr end() const { return e_; }
 private:

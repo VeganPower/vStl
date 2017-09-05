@@ -6,15 +6,39 @@
 
 using namespace vstl;
 
+template<typename T>
+void print_a(GrowableArray<T> const& a)
+{
+   for (auto const& i : a.iter())
+   {
+      std::cout << i << "\n";
+   }
+   std::cout << std::endl;
+}
+
 int main()
 {
-   GrowableVector<int> a = { 1, 2, 3, 4, 5 };
+   GrowableArray<int> a = { 1, 2, 3, 4, 5 };
 
    // Meh
-   for (auto& i : a.iter())
-   {
-      std::cout << i;
-   }
+   print_a(a);
+
+   for (int i = 0; i < 10; ++i)
+      a.push_back(a.size()+1);
+
+   print_a(a);
+
+   a.resize(3);
+   print_a(a);
+
+   GrowableArray<std::string> b { "abc", "cde", "efg" };
+   GrowableArray<std::string> c = b;
+   print_a(b);
+   print_a(c);
+
+   b = c;
+
+   print_a(b);
 
    /*
     TODO:

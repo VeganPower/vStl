@@ -53,29 +53,51 @@ public:
 
    auto operator = (MemoryBuffer const & to_copy) -> MemoryBuffer&
    {
-      void* ptr = nullptr;
-      if (size_ < to_copy.size())
+      void* ptr = ptr_;
+      if (alignment_ != to_copy.alignment_)
       {
-         ptr = realloc(ptr_, to_copy.size());
-         V_ASSERT(ptr == ptr_);
+         ptr = aligned_alloc(to_copy.alignment(), to_copy.size());
+         alignment_ = to_copy.alignment_;
+         size_ = to_copy.size_;
+      }
+      else if (size_ > to_copy.size())
+      {
+         ptr = aligned_alloc(to_copy.alignment(), to_copy.size());
+         size_ = to_copy.size_;
+      }
+      if (ptr == nullptr  && to_copy.size() > 0)
+      {
+         bad_alloc();
       }
       else
       {
-         ptr = aligned_alloc(to_copy.alignment(), to_copy.size());
+         memcpy(ptr, to_copy.ptr_, to_copy.size());
+         free(ptr_);
+         ptr_ = ptr;
       }
-      #if __cpp_exceptions
-      if (ptr == nullptr && to_copy.size() > 0)
-      {
-         throw(std::bad_alloc());
-      }
-      #endif
-      memcpy(ptr, to_copy.ptr_, to_copy.size());
-      ptr_ = ptr;
-      free(ptr);
-
-      size_ = to_copy.size_;
-      alignment_ = to_copy.alignment_;
       return *this;
+   }
+
+   void resize(size_t new_size)
+   {
+      if (size_ > new_size)
+      {
+         void* ptr = realloc(ptr_, new_size);
+         assert(ptr == ptr_);
+      }else if (size_ < new_size)
+      {
+         void* ptr = aligned_alloc(alignment_, new_size);
+         if (ptr == nullptr  && new_size > 0)
+         {
+            bad_alloc();
+         } else
+         {
+            memcpy(ptr, ptr_, new_size);
+            free(ptr_);
+            ptr_ = ptr;
+         }
+      }
+      size_ = new_size;
    }
 
    auto operator = (MemoryBuffer&& to_move) -> MemoryBuffer&
@@ -103,6 +125,14 @@ public:
    size_t size() const { return static_cast<size_t>(size_); }
    size_t alignment() const { return static_cast<size_t>(alignment_); }
 private:
+   void bad_alloc()
+   {
+      #if __cpp_exceptions
+      throw(std::bad_alloc());
+      #else
+      V_ASSERT(0);
+      #endif
+   }
    void* ptr_ = nullptr;
    size_type size_ = 0;
    align_type alignment_ = 0;
