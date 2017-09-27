@@ -1,3 +1,5 @@
+#pragma once
+
 #include "v_assert.h"
 #include "config.h"
 

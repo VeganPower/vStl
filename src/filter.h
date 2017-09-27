@@ -1,7 +1,13 @@
 //
 
+#include "range.h"
 // filter
 //  
+
+
+//->filter(it)
+  //->take(3)
+
 
 /// LAZY EVALUATION
 // Keep reference for l-value
@@ -11,12 +17,13 @@
 // TODO:
 // adaptor object carry everything that is common to all iterator (func/ end)
 // iterator carry reference to adaptor
+#if 0
 template<typename Base, typename Func>
-struct FilterRange
+struct FiltredRange
 {
-   Func func_;
    Base& base_;
-
+   Func func_;
+/*
    using Index = typename Base::Index;
    void increment_index(Index& idx)
    {
@@ -26,6 +33,7 @@ struct FilterRange
                && !func_(base_.dereference_index(idx))
          );
    }
+*/
    struct Iterator
    {
    private:
@@ -44,7 +52,63 @@ struct FilterRange
       }
    }; 
 };
+#endif
 
+namespace vstl
+{
+
+template<typename iterator, typename func_t>
+struct FilteredIterator
+{
+   iterator it;
+   func_t f;
+
+   int operator*() const
+   {
+      return *it;
+   }
+
+   iterator operator ++()
+   {
+      do
+      {
+         advance(it);
+      }
+      while(!f(*it));  // Fix me: This one should stop if iterator reach the end of the range. :-/  
+      return it;
+   }
+
+   iterator operator ++(int)
+   {
+      iterator ret = it;
+      operator++();
+      return ret;
+   }
+
+};
+
+template<typename iterator, typename func_t>
+bool operator!=(FilteredIterator<iterator, func_t> const& lhs, iterator const& rhs)
+{
+   return lhs.it != rhs;
+}
+
+template<typename iterator, typename func_t>
+bool operator!=(iterator const& lhs, FilteredIterator<iterator, func_t> const& rhs)
+{
+   return lhs != rhs.it;
+}
+
+
+template<typename T, typename Func_t>
+auto filter(T const& base, Func_t const& f) // -> Range<FilteredIterator<typename T::>
+{
+   typedef FilteredIterator<typename T::iterator, Func_t> it_t;
+   it_t it { base.begin(), f };
+   return Range<typename T::type, it_t, typename T::iterator_end>(it, base.end());
+}
+
+#if 0
 template<typename Base, typename Func>
 struct IndexRange
 {
@@ -68,3 +132,5 @@ struct IteratorForIndex
       return *this;
    }
 };
+#endif
+}
