@@ -12,10 +12,10 @@ template<typename T>
 void print_a(T const& a)
 {
    // meh
-   for_each(a, [](int it)
+   for_each(a, [](typename T::type const &v)
       //typename T::const_reference it)
    {
-      std::cout << it << "\n";
+      std::cout << v << "\n";
    });
    std::cout << std::endl;
 }

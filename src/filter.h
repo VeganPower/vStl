@@ -57,55 +57,74 @@ struct FiltredRange
 namespace vstl
 {
 
-template<typename iterator, typename func_t>
-struct FilteredIterator
+template<typename Base, typename Func_t>
+struct FiltredRange : Base
 {
-   iterator it;
-   func_t f;
+   // typedef Base::iterator iterator;
+   // typedef Base::iterator_end iterator_end;
+   
+   Func_t f_;
 
-   int operator*() const
+   FiltredRange(Base const& b, Func_t f)
+      : Base { b }
+      , f_ { f }
    {
-      return *it;
    }
 
-   iterator operator ++()
+   typename Base::iterator begin() const
    {
-      do
+      typename Base::iterator it = Base::begin();
+      if(!f_(Base::get(it)))
       {
          advance(it);
       }
-      while(!f(*it));  // Fix me: This one should stop if iterator reach the end of the range. :-/  
       return it;
    }
 
-   iterator operator ++(int)
+   typename Base::iterator_end end() const
    {
-      iterator ret = it;
-      operator++();
-      return ret;
+      Base::end();
    }
 
+   static typename Base::type get(typename Base::iterator const& it)
+   {
+      return Base::get(it);
+   }
+
+   static bool advance(typename Base::iterator& it)
+   {
+      do
+      {
+         if (Base::compare(it, Base::end()))
+         {
+            false;
+         }
+         Base::advance(it);
+      }
+      while(!f_(*it));  // Fix me: This one should stop if iterator reach the end of the range. :-/  
+      return true;
+   }
 };
 
-template<typename iterator, typename func_t>
-bool operator!=(FilteredIterator<iterator, func_t> const& lhs, iterator const& rhs)
-{
-   return lhs.it != rhs;
-}
+// template<typename iterator, typename func_t>
+// bool operator!=(FilteredIterator<iterator, func_t> const& lhs, iterator const& rhs)
+// {
+//    return lhs.it != rhs;
+// }
 
-template<typename iterator, typename func_t>
-bool operator!=(iterator const& lhs, FilteredIterator<iterator, func_t> const& rhs)
-{
-   return lhs != rhs.it;
-}
+// template<typename iterator, typename func_t>
+// bool operator!=(iterator const& lhs, FilteredIterator<iterator, func_t> const& rhs)
+// {
+//    return lhs != rhs.it;
+// }
 
 
 template<typename T, typename Func_t>
 auto filter(T const& base, Func_t const& f) // -> Range<FilteredIterator<typename T::>
 {
-   typedef FilteredIterator<typename T::iterator, Func_t> it_t;
-   it_t it { base.begin(), f };
-   return Range<typename T::type, it_t, typename T::iterator_end>(it, base.end());
+   // typedef FiltredRange<T, Func_t> it_t;
+   // it_t it { base.begin(), f };
+   return FiltredRange<T, Func_t>(base, f);
 }
 
 #if 0
