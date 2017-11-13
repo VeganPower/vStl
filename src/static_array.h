@@ -1,7 +1,7 @@
 #pragma once
 
 #include "config.h"
-#include "range.h"
+#include "views/array_view.hpp"
 #include "elems.h"
 
 #include "memory_buffer.h"
@@ -64,13 +64,14 @@ public:
       ElemFacade<T, std::is_pod<T>::value >::destroy_elements(get(), size());
    }
 
+/*
    StaticArray(ConstPtrRange<T> const& range)
       : memory_(range.distance() * k_elem_size, alignment)
       , size_(range.distance())
    {
       ElemFacade<T, std::is_pod<T>::value >::assign_elements(get(), range.begin(), size_);
    }
-
+*/
    T& operator[](size_t t)
    {
       return get()[t];
@@ -81,17 +82,17 @@ public:
       return get()[t];
    }
 
-   auto iter() const -> ConstPtrRange<T>
+//   auto iter() const -> ConstPtrRange<T>
+//   {
+//      return ConstPtrRange<T>(get(), get() + size()); // to we really want use range based iterator?
+//   }
+
+   auto iter()
    {
-      return ConstPtrRange<T>(get(), get() + size()); // to we really want use range based iterator?
+      return view::Array<T>(get(), get() + size());
    }
 
-   auto iter() -> PtrRange<T>
-   {
-      return PtrRange<T>(get(), get() + size()); // to we really want use range based iterator?
-   }
-
-   size_t size() const
+   constexpr size_t size() const
    {
       return static_cast<size_t>(size_);
    }

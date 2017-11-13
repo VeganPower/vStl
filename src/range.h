@@ -6,7 +6,7 @@
 namespace vstl
 {
 
-template<typename T, typename Iterator, typename IteratorEnd = Iterator>
+template<typename T, typename Iterator, typename Sentinel = Iterator>
 class Range
 {
 public:
@@ -17,7 +17,7 @@ public:
    typedef type const& const_reference;
 
    typedef Iterator iterator;
-   typedef IteratorEnd iterator_end;
+   typedef Sentinel sentinel;
    /*
    Range(iterator b, iterator_end e)
       : b_(b)
@@ -115,8 +115,6 @@ struct ConstPtrRange // : public Range<T, typename std::remove_cv<T>::type const
    {
       return 4;//Range<T, ptr>::end() - Range<T, ptr>::begin();
    }
-   
-
 private:
    const iterator b_;
    const iterator_end e_;

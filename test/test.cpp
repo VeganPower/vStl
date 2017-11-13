@@ -1,9 +1,9 @@
 
 #include <iostream>
 
-#include <growable_vector.h>
+//#include <growable_vector.h>
 #include <static_array.h>
-#include <filter.h>
+// #include <filter.h>
 #include <for_each.h>
 
 using namespace vstl;
@@ -11,8 +11,7 @@ using namespace vstl;
 template<typename T>
 void print_a(T const& a)
 {
-   // meh
-   for_each(a, [](typename T::type const &v)
+   for_each(a, [](int const &v)
       //typename T::const_reference it)
    {
       std::cout << v << "\n";
@@ -22,22 +21,22 @@ void print_a(T const& a)
 
 int main()
 {
-   GrowableArray<int> a = { 1, 2, 3, 4, 5 };
+   StaticArray<int> a = { 1, 2, 3, 4, 5 };
 
    print_a(a.iter());
 
-   for (int i = 0; i < 10; ++i)
-      a.push_back(a.size()+1);
+   // for (int i = 0; i < 10; ++i)
+      // a.push_back(a.size()+1);
 
-   print_a(a.iter());
-   // print_a<int>(a.iter()
+   // print_a(a.iter());
+   // print_a(a.iter()
       // | filter([](int i){ return i > 3; }));
-  print_a(filter(a.iter(),
-      [](int i) -> bool { return i > 3; })
-  );
+   // print_a(filter(a.iter(),
+       // [](int i) -> bool { return i > 3; })
+   // );
 
-   a.resize(3);
-   print_a(a.iter());
+   // a.resize(3);
+   // print_a(a.iter());
 #if 0
    GrowableArray<std::string> b { "abc", "cde", "efg" };
    StaticArray<std::string> c { b.iter() };
