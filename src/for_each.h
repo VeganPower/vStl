@@ -11,7 +11,6 @@ void for_each(View& r, Fun_t f)
    while(it != end)
    {
       f(*it);
-      // TODO: Should I just use operator++?
       ++it;
    }
 }

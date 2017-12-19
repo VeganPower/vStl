@@ -8,7 +8,7 @@ namespace vstl
 template<typename Cursor>
 struct Iterator
 {
-   Iterator(int const* c)
+   Iterator(Cursor c)
       : cursor_(c)
    {}
    // pointer

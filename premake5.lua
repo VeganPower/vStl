@@ -7,8 +7,8 @@ project "vStlTest"
    language "C++"
    targetdir "bin/%{cfg.buildcfg}"
    includedirs './src/'
-   cppdialect 'C++14'
-   files { "test/**.h", "test/**.cpp" }
+   cppdialect 'C++17'
+   files { "test/**.h", "test/test2.cpp" }
 
    filter "configurations:Debug"
       defines { "DEBUG" }

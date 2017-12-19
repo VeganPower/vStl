@@ -1,10 +1,19 @@
 #pragma once
 
+#ifndef ENABLE_VIEW
+#define ENABLE_VIEW 0
+#endif
+
 #include "config.h"
+
+#if ENABLE_VIEW
 #include "views/array_view.hpp"
+#endif
+
 #include "elems.h"
 
 #include "memory_buffer.h"
+#include <utility>
 #include <type_traits>
 #include <initializer_list>
 
@@ -86,12 +95,12 @@ public:
 //   {
 //      return ConstPtrRange<T>(get(), get() + size()); // to we really want use range based iterator?
 //   }
-
+#if ENABLE_VIEW
    auto iter()
    {
       return view::Array<T>(get(), get() + size());
    }
-
+#endif
    constexpr size_t size() const
    {
       return static_cast<size_t>(size_);
