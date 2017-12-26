@@ -1,54 +1,64 @@
 #pragma once
 
+#include <type_traits>
 #include <functional>
+#include "function_traits.hpp"
 
-
-template<typename View_t>
-struct FilterFun : View_t
+template<typename T>
+struct ViewTraits
 {
-   FilterFun(View_t const& v, std::function<bool(int)> p);
-
-   void next();
-
-   std::function<bool(int)> pred;
+   typedef decltype(std::declval<T>().read()) ViewValue_t;
 };
 
-template<typename View_t>
-void advance_to_first_valid(FilterFun<View_t>& f)
+template<typename T>
+void advance_to_first_valid(T& f)
 {
-   while(!f.done() && !f.pred(f.read()))
+   while(!f.done() && !std::invoke(f.pred, f.read()))
    {
       f.next();
    }
 }
 
 template<typename View_t>
-FilterFun<View_t>::FilterFun(View_t const& v, std::function<bool(int)> p)
-   : View_t(v)
-   , pred(p)
+struct FilterFun : View_t
 {
-   advance_to_first_valid(*this);   
-}
+   typedef typename ViewTraits<View_t>::ViewValue_t ViewValue_t;
+   typedef typename std::function<bool(ViewValue_t)> Pred_t;
+   FilterFun(View_t const& v, Pred_t p)
+      : View_t(v)
+      , pred(p)
+   {
+      advance_to_first_valid(*this);   
+   }
 
-template<typename View_t>
-void FilterFun<View_t>::next()
-{
-   View_t::next();
-   advance_to_first_valid(*this);
-}
+   void next()
+   {
+      View_t::next();
+      advance_to_first_valid(*this);
+   }
 
-struct FilterOp
-{
-   std::function<bool(int)> pred;
+   Pred_t pred;
 };
 
-template<typename View_t>
-FilterFun<View_t> operator |(View_t const& right, FilterOp const& left)
+template<typename T>
+struct FilterOp
 {
-   return FilterFun<View_t>(right, left.pred);   
+   std::function<bool(T)> params;
+};
+
+template<typename T>
+auto filter(T const& p)
+{
+   // static_assert(std::is_convertible_v<T, std::function>); 
+   // static_assert(std::is_function_v<T>); // doesn't works with lambdas 
+   typedef function_traits<T> PredTraits;
+   static_assert(PredTraits::arity == 1); 
+   typedef typename PredTraits::template arg<0>::type Filter_type; 
+   return FilterOp<Filter_type> { p };
 }
 
-FilterOp filter(std::function<bool(int)> p)
+template<typename View_t>
+FilterFun<View_t> operator |(View_t const& right, FilterOp<typename ViewTraits<View_t>::ViewValue_t> const& left)
 {
-   return FilterOp { p };
+   return FilterFun<View_t>(right, left.params);   
 }

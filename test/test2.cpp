@@ -3,10 +3,6 @@
 #include <functional>
 
 #include "filter.hpp"
-// Exercise with 
-//   read
-//   next
-//   done
 
 struct IntView
 {
@@ -98,15 +94,16 @@ TakeOp take(int p)
    return TakeOp{ p };
 }
 
-int main(int argc, char const *argv[])
+int main()
 {
    vstl::StaticArray<int> a = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19 };
 
    // a.iter() | filter(x>3) | transform(x*x) | take(4)
    IntView view = { &a[0], &a[a.size()] };
-   for (auto t = view | filter( [](int x) { return x > 3; })
-             | transform( [](int x) -> int { return x*x; })
-             | take(4);
+   for (auto t = view
+               | filter( [](int x)  { return x > 3; })
+               | transform( [](int x) -> int { return x*x; })
+               | take(4);
          !t.done(); t.next()
       )
    {
