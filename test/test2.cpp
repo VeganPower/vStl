@@ -4,6 +4,9 @@
 
 #include "filter.hpp"
 
+// cartesian product
+// for (int i = 0; i != end; ++i)
+
 struct IntView
 {
    int* cursor = nullptr;
@@ -25,36 +28,44 @@ struct IntView
    }
 };
 
-template<typename View_t>
+template<typename View_t, typename result_type, typename filter_type>
 struct TransformFun : public View_t
 {
-   TransformFun(View_t const&v, std::function<int(int)> p)
+   TransformFun(View_t const&v, std::function<result_type(filter_type)> p)
       : View_t(v)
       , pred(p)
    {}
 
-   int read()
+   result_type read()
    {
       return pred(View_t::read());
    }
 
-   std::function<int(int)> pred;
+   std::function<result_type(filter_type)> pred;
 };
 
+template<typename T>
 struct TransformOp
 {
-   std::function<int(int)> pred;
+   T pred;
+   // std::function<int(int)> pred;
 };
 
-template<typename View_t>
-TransformFun<View_t> operator |(View_t const& right, TransformOp const& left)
+template<typename View_t, typename T>
+auto operator |(View_t const& right, TransformOp<T> const& left)
 {
-   return TransformFun<View_t>(right, left.pred);   
+   typedef function_traits<T> PredTraits;
+   static_assert(PredTraits::arity == 1); 
+   typedef typename PredTraits::template arg<0>::type filter_type; 
+   typedef typename PredTraits::result_type result_type; 
+
+   return TransformFun<View_t, result_type, filter_type>(right, left.pred);   
 }
 
-TransformOp transform(std::function<int(int)> p)
+template<typename T>
+TransformOp<T> transform(T const& p)
 {
-   return TransformOp{ p };
+   return TransformOp<T>{ p };
 }
 
 template<typename View_t>
@@ -102,12 +113,12 @@ int main()
    IntView view = { &a[0], &a[a.size()] };
    for (auto t = view
                | filter( [](int x)  { return x > 3; })
-               | transform( [](int x) -> int { return x*x; })
-               | take(4);
+               | transform( [](int x) -> float { return x*x+0.5f; })
+               | take(40);
          !t.done(); t.next()
       )
    {
-      int const& x = t.read();
+      auto const& x = t.read();
       std::cout << x << " ";
    }
    std::cout << std::endl;
