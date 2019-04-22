@@ -47,7 +47,7 @@ public:
       : memory_ { to_copy.size() * k_elem_size, alignment }
       , size_ { to_copy.size_ }
    {
-      ElemFacade<T, std::is_pod<T>::value >::construct_elements(get(), to_copy.get(), to_copy.size());
+      ElemFacade<T>::construct_elements(get(), to_copy.get(), to_copy.size());
    }
 
    GrowableArray(GrowableArray<T, alignment>&& to_move)
@@ -59,7 +59,7 @@ public:
    GrowableArray const & operator = (GrowableArray<T, alignment> const& to_copy)
    {
       memory_.resize(to_copy.size() * k_elem_size);
-      ElemFacade<T, std::is_pod<T>::value >::assign_elements(get(), to_copy.get(), to_copy.size());
+      ElemFacade<T>::assign_elements(get(), to_copy.get(), to_copy.size());
       return *this;
    }
 

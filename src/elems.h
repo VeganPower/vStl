@@ -10,34 +10,10 @@
 namespace vstl
 {
 
-template<typename T, bool is_pod>
-struct ElemFacade;
-
 template<typename T>
-struct ElemFacade<T, true>
+struct ElemFacade<T>
 {
-   static void construct_elements(T* dest, T const* src, size_t count)
-   {
-      memcpy(dest, src, count * sizeof(T));
-   }
-
-   static void assign_elements(T* dest, T const* src, size_t count)
-   {
-      memcpy(dest, src, count * sizeof(T));
-   }
-   static void move_elements(T* dest, T* src, size_t count)
-   {
-      // nothing to do
-   }
-   static void destroy_elements(T* elems, size_t count)
-   {
-      // nothing to do
-   }
-};
-
-template<typename T>
-struct ElemFacade<T, false>
-{
+   static void default_construct_elements(T* dest, T const* src, size_t count);
    static void construct_elements(T* dest, T const* src, size_t count);
    static void assign_elements(T* dest, T const* src, size_t count);
    static void move_elements(T* dest, T* src, size_t count);
@@ -45,38 +21,64 @@ struct ElemFacade<T, false>
 };
 
 template<typename T>
-void ElemFacade<T, false>::construct_elements(T* dest, T const* src, size_t count)
+void ElemFacade<T>::default_construct_elements(T* dest, T const* src, size_t count)
 {
-   for (size_t i = 0; i < count; ++i)
+
+}
+
+template<typename T>
+void ElemFacade<T>::construct_elements(T* dest, T const* src, size_t count)
+{
+   if constexpr (std::is_trivially_copyable<T>::value )
    {
-      new(dest+i)T(src[i]);
+      memcpy(dest, src, count * sizeof(T));
+   }
+   else
+   {
+      for (size_t i = 0; i < count; ++i)
+      {
+         new(dest + i)T(src[i]);
+      }
    }
 }
 
 template<typename T>
-void ElemFacade<T, false>::assign_elements(T* dest, T const* src, size_t count)
+void ElemFacade<T>::assign_elements(T* dest, T const* src, size_t count)
 {
-   for (size_t i = 0; i < count; ++i)
+   if constexpr (std::is_trivially_copyable<T>::value )
    {
-      dest[i] = src[i];
+      memcpy(dest, src, count * sizeof(T));
+   }
+   else
+   {
+      for (size_t i = 0; i < count; ++i)
+      {
+         dest[i] = src[i];
+      }
    }
 }
 
 template<typename T>
-void ElemFacade<T, false>::move_elements(T* dest, T* src, size_t count)
+void ElemFacade<T>::move_elements(T* dest, T* src, size_t count)
 {
-   for (size_t i = 0; i < count; ++i)
+   if constexpr (!std::is_pod<T>::value )
    {
-      dest[i] = std::move(src[i]);
+      for (size_t i = 0; i < count; ++i)
+      {
+         dest[i] = std::move(src[i]);
+      }
    }
 }
 
 template<typename T>
 void ElemFacade<T, false>::destroy_elements(T* elems, size_t count)
 {
-   for (size_t i = 0; i < count; ++i)
+   if constexpr (!std::is_pod<T>::value )
    {
-      (elems+i)->~T();
+      for (size_t i = 0; i < count; ++i)
+      {
+         (elems + i)->~T();
+      }
    }
 }
 

@@ -59,7 +59,7 @@ public:
       : memory_ { to_copy.size() * k_elem_size, alignment }
       , size_ { to_copy.size_ }
    {
-      ElemFacade<T, std::is_pod<T>::value >::construct_elements(get(), to_copy.get(), to_copy.size());
+      ElemFacade<T>::construct_elements(get(), to_copy.get(), to_copy.size());
    }
 
    StaticArray(StaticArray<T, alignment>&& to_move)
@@ -70,7 +70,7 @@ public:
 
    ~StaticArray()
    {
-      ElemFacade<T, std::is_pod<T>::value >::destroy_elements(get(), size());
+      ElemFacade<T>::destroy_elements(get(), size());
    }
 
 /*
