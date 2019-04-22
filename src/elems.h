@@ -11,7 +11,7 @@ namespace vstl
 {
 
 template<typename T>
-struct ElemFacade<T>
+struct ElemFacade
 {
    static void default_construct_elements(T* dest, T const* src, size_t count);
    static void construct_elements(T* dest, T const* src, size_t count);
@@ -71,7 +71,7 @@ void ElemFacade<T>::move_elements(T* dest, T* src, size_t count)
 }
 
 template<typename T>
-void ElemFacade<T, false>::destroy_elements(T* elems, size_t count)
+void ElemFacade<T>::destroy_elements(T* elems, size_t count)
 {
    if constexpr (!std::is_pod<T>::value )
    {

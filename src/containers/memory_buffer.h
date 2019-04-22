@@ -7,13 +7,14 @@
 #include <new>
 #endif
 
-#include <intrin.h>
 #include <limits>
 #include <memory>
 #include <stdlib.h>
 #include <string.h>
 
 #ifdef _MSC_VER
+
+#include <intrin.h>
 
 __declspec(noalias, restrict ) inline void* aligned_alloc(uint32_t alignment, size_t size)
 {
@@ -30,6 +31,15 @@ inline void aligned_free(void* ptr)
    free(ptr);
 }
 #endif
+
+unsigned int lzcnt(unsigned int x)
+{
+#ifdef _MSC_VER
+   return __lzcnt(x);
+#else
+   return __builtin_clz(x);
+#endif
+}
 
 namespace vstl
 {
@@ -156,7 +166,7 @@ private:
       V_ASSERT(((alignment - 1) & alignment) == 0);
       V_ASSERT(size >= sizeof(size_type));
       V_ASSERT(size <= k_max_size);
-	  size_type preamble = preamble_size(alignment);
+      size_type preamble = preamble_size(alignment);
       void* p = aligned_alloc(alignment, (size_t)(size + preamble));
       if (p == nullptr)
       {
@@ -166,7 +176,7 @@ private:
 
       size_type size_m = k_size_mask & size;
       size_type* size_position = (size_type*)((uint8_t*)ptr_ - sizeof(size_type));
-      uint64_t log_alignment = sizeof(alignment_type) * 8 - __lzcnt(alignment) - 1;
+      uint64_t log_alignment = sizeof(alignment_type) * 8 - lzcnt(alignment) - 1;
       V_ASSERT(log_alignment < 32);
       *size_position = size_m | ((log_alignment - k_log_min_alignment) << k_log_align_shift);
    }
@@ -184,7 +194,7 @@ private:
    }
    size_type* size_ptr()
    {
-	   return (size_type*)((uint8_t*)ptr_ - sizeof(size_type));
+      return (size_type*)((uint8_t*)ptr_ - sizeof(size_type));
    }
    void* ptr_ = nullptr;
 };
