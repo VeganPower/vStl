@@ -30,6 +30,16 @@ inline void aligned_free(void* ptr)
 {
    free(ptr);
 }
+#else
+
+constexpr int lzcnt(unsigned int x)
+{
+#if __GNUC__
+   return __builtin_ia32_lzcnt_u32(x);
+#else
+   return __lzcnt(x);
+#endif
+}
 #endif
 
 unsigned int lzcnt(unsigned int x)
